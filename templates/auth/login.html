@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - Personalized Learning Recommendation System{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div class="brand-icon" style="margin: 0 auto 16px; width: 48px; height: 48px; font-size: 1.5rem;">🔐</div>
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900);">Sign In</h2>
+      <p style="color: var(--gray-500); font-size: 0.9rem;">Access your personalized learning portal</p>
+    </div>
+
+    <form id="login-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+      </div>
+
+      <button type="submit" id="login-btn" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+        Sign In
+      </button>
+    </form>
+
+    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--gray-200); text-align: center;">
+      <p style="font-size: 0.9rem; color: var(--gray-600);">
+        New student? <a href="/register/">Create a Learner Account</a>
+      </p>
+    </div>
+
+    <!-- Quick Role Switcher for Evaluators / Demonstrators -->
+    <div style="margin-top: 24px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 14px;">
+      <p style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--gray-500); margin-bottom: 8px;">
+        🧪 Quick Demo Account Fill (Password: Admin12345!)
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        <button type="button" onclick="fillCreds('learner_000001')" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">👤 Learner</button>
+        <button type="button" onclick="fillCreds('prof_smith')" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">👨‍🏫 Instructor</button>
+        <button type="button" onclick="fillCreds('academic_admin')" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">🏛️ Academic</button>
+        <button type="button" onclick="fillCreds('support_rep')" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">🎧 Support</button>
+        <button type="button" onclick="fillCreds('platform_admin')" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">🛡️ Admin</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function fillCreds(username) {
+  document.getElementById('username').value = username;
+  document.getElementById('password').value = 'Admin12345!';
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerText = 'Verifying...';
+
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  try {
+    const data = await apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+
+    showToast(data.message, 'success');
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 500);
+  } catch (err) {
+    showToast(err.message, 'danger');
+    btn.disabled = false;
+    btn.innerText = 'Sign In';
+  }
+});
+</script>
+{% endblock %}

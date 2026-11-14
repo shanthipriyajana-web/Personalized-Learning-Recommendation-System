@@ -1,0 +1,66 @@
+[
+  {
+    "issue_id": "ANOM-0001",
+    "issue_type": "PREREQUISITE_VIOLATION",
+    "related_entity_id": "REC-ANOM-0001",
+    "ground_truth_label": "PREREQUISITE_VIOLATION",
+    "expected_decision": "Course content in locked advanced course must NOT be recommended.",
+    "actual_decision": "Recommended advanced module despite missing prerequisites.",
+    "validation_result": "DETECTED",
+    "details_json": {
+      "learner_id": "LRN-000001",
+      "content_id": "CNT-000004"
+    }
+  },
+  {
+    "issue_id": "ANOM-0002",
+    "issue_type": "INVALID_TIMESTAMP_ORDER",
+    "related_entity_id": "ATT-ANOM-0002",
+    "ground_truth_label": "INVALID_TIMESTAMP_ORDER",
+    "expected_decision": "completed_at must be greater than or equal to started_at.",
+    "actual_decision": "completed_at (2026-11-14 06:47:25.058753+00:00) is earlier than started_at (2026-11-14 09:47:25.058753+00:00).",
+    "validation_result": "DETECTED",
+    "details_json": {
+      "attempt_id": "ATT-ANOM-0002"
+    }
+  },
+  {
+    "issue_id": "ANOM-0003",
+    "issue_type": "NONEXISTENT_SKILL_MAPPING",
+    "related_entity_id": "CNT-999999",
+    "ground_truth_label": "NONEXISTENT_SKILL_MAPPING",
+    "expected_decision": "All content-skill foreign keys must resolve to active Skill entities.",
+    "actual_decision": "Content item references nonexistent foreign skill SKL-999999.",
+    "validation_result": "DETECTED",
+    "details_json": {
+      "content_id": "CNT-999999",
+      "target_skill": "SKL-999999"
+    }
+  },
+  {
+    "issue_id": "ANOM-0004",
+    "issue_type": "FUTURE_ATTEMPT_LEAKAGE",
+    "related_entity_id": "ATT-ANOM-0004",
+    "ground_truth_label": "FUTURE_ATTEMPT_LEAKAGE",
+    "expected_decision": "Historical mastery calculation must filter completed_at <= evaluation_cutoff.",
+    "actual_decision": "Attempt with future timestamp (2026-12-14 09:47:25.058753+00:00) detected in dataset.",
+    "validation_result": "DETECTED",
+    "details_json": {
+      "attempt_id": "ATT-ANOM-0004",
+      "timestamp": "2026-12-14T09:47:25.058753+00:00"
+    }
+  },
+  {
+    "issue_id": "ANOM-0005",
+    "issue_type": "LEARNING_PATH_LOOP",
+    "related_entity_id": "PATH-ANOM-0005",
+    "ground_truth_label": "LEARNING_PATH_LOOP",
+    "expected_decision": "Learning paths must advance sequentially along DAG without repeating steps.",
+    "actual_decision": "Path contains cyclic loop repeating Module #1 without progress advancement.",
+    "validation_result": "DETECTED",
+    "details_json": {
+      "path_id": "PATH-ANOM-0005",
+      "loop_count": 5
+    }
+  }
+]

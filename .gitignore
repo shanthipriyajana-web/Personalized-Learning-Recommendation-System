@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Environment
+.env
+
+# Data artifacts
+data/*.csv
+data/*.json
+!data/ground_truth.json
+!data/ground_truth.csv
+
+# IDEs
+.vscode/
+.idea/
+*.swp

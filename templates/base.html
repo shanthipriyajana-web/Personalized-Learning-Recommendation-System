@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Personalized Learning Recommendation System{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="brand">
+        <div class="brand-icon">🎓</div>
+        <span>Antigravity Learn</span>
+      </a>
+
+      <div class="nav-user">
+        {% if user.is_authenticated %}
+          <span class="role-badge role-{{ user.role|lower }}">{{ user.get_role_display }}</span>
+          <span style="font-weight: 600; color: var(--gray-700);">{{ user.first_name|default:user.username }}</span>
+          <button onclick="handleLogout()" class="btn btn-secondary btn-sm">Sign Out</button>
+        {% else %}
+          <a href="/login/" class="btn btn-secondary btn-sm">Sign In</a>
+          <a href="/register/" class="btn btn-primary btn-sm">Register as Learner</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 Personalized Learning Recommendation System. Built with Django, DRF, and Three-Tier Architecture.</p>
+  </footer>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <script src="/static/js/api.js"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

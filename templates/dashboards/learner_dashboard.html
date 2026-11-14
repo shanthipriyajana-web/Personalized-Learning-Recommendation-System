@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}Learner Dashboard - Antigravity Learn{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="margin-bottom: 24px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--gray-900);">
+        Welcome, {{ user.first_name|default:user.username }}! 👋
+      </h1>
+      <p style="color: var(--gray-500); font-size: 0.95rem;">
+        Learner ID: <code style="font-weight: 700; color: var(--primary);">{{ learner.learner_id }}</code> | Academic Level: {{ learner.current_education_level }}
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 12px;">
+      <button onclick="triggerRecommendationGeneration()" class="btn btn-outline btn-sm">
+        ⚡ Refresh Recommendations
+      </button>
+      <button onclick="openSupportTicketModal()" class="btn btn-secondary btn-sm">
+        💬 Contact Support
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Key Stat Cards -->
+<div class="grid grid-cols-4" style="margin-bottom: 32px;">
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">Enrolled Courses</span>
+      <div class="stat-icon" style="background: #e0e7ff; color: #4338ca;">📚</div>
+    </div>
+    <div class="stat-value" id="stat-enrolled-count">...</div>
+    <div class="stat-footer">Curriculum Progression</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">Skills Mastered</span>
+      <div class="stat-icon" style="background: #d1fae5; color: #065f46;">🎯</div>
+    </div>
+    <div class="stat-value" id="stat-mastered-count">...</div>
+    <div class="stat-footer">Mastery &ge; 70%</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">Activities Done</span>
+      <div class="stat-icon" style="background: #fef3c7; color: #92400e;">🏆</div>
+    </div>
+    <div class="stat-value" id="stat-activities-count">{{ learner.total_completed_activities }}</div>
+    <div class="stat-footer">Completed modules & quizzes</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">Path Progress</span>
+      <div class="stat-icon" style="background: #ede9fe; color: #6d28d9;">🚀</div>
+    </div>
+    <div class="stat-value" id="stat-path-progress">...</div>
+    <div class="stat-footer">Active Goal Milestone</div>
+  </div>
+</div>
+
+<!-- Tabs Navigation Container -->
+<div class="tabs-container">
+  <div class="tabs-nav">
+    <button class="tab-btn active" data-tab="tab-recommendations">🌟 Next Recommended Activities</button>
+    <button class="tab-btn" data-tab="tab-mastery">📊 Skill Mastery</button>
+    <button class="tab-btn" data-tab="tab-path">🗺️ Learning Path</button>
+    <button class="tab-btn" data-tab="tab-courses">📖 Course Catalog & Gating</button>
+    <button class="tab-btn" data-tab="tab-history">⏱️ Assessment Attempts</button>
+    <button class="tab-btn" data-tab="tab-support">🎧 Support Tickets</button>
+  </div>
+
+  <!-- TAB 1: RECOMMENDATIONS -->
+  <div id="tab-recommendations" class="tab-content active">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">Personalized Learning Recommendations</h3>
+        <p style="color: var(--gray-500); font-size: 0.9rem;">
+          Computed deterministically from your knowledge gaps, prerequisite eligibility, and past attempt outcomes.
+        </p>
+      </div>
+    </div>
+
+    <div id="recommendations-container">
+      <div style="text-align: center; padding: 40px; color: var(--gray-400);">Loading recommendations...</div>
+    </div>
+  </div>
+
+  <!-- TAB 2: SKILL MASTERY -->
+  <div id="tab-mastery" class="tab-content">
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">Skill Mastery Profile</h3>
+      <p style="color: var(--gray-500); font-size: 0.9rem;">
+        Mastery is computed from your valid assessment attempts: <code>Sum(Scores) / Count(Attempts)</code>.
+      </p>
+    </div>
+
+    <!-- Threshold Guide -->
+    <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+      <span class="role-badge" style="background: var(--danger-bg); color: var(--danger-text);">Needs Improvement (&lt;40%)</span>
+      <span class="role-badge" style="background: var(--warning-bg); color: var(--warning-text);">Developing (40-69%)</span>
+      <span class="role-badge" style="background: #e0e7ff; color: #4338ca;">Proficient (70-84%)</span>
+      <span class="role-badge" style="background: var(--success-bg); color: var(--success-text);">Mastered (&ge;85%)</span>
+    </div>
+
+    <div id="mastery-container" class="grid grid-cols-2">
+      <div style="color: var(--gray-400);">Loading mastery data...</div>
+    </div>
+  </div>
+
+  <!-- TAB 3: LEARNING PATH -->
+  <div id="tab-path" class="tab-content">
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">Active Trajectory</h3>
+      <p style="color: var(--gray-500); font-size: 0.9rem;">
+        Topologically sorted sequence of learning modules ensuring prerequisites are completed before advanced topics.
+      </p>
+    </div>
+
+    <div id="path-container">
+      <div style="color: var(--gray-400);">Loading learning path...</div>
+    </div>
+  </div>
+
+  <!-- TAB 4: COURSE CATALOG & PREREQUISITE GATING -->
+  <div id="tab-courses" class="tab-content">
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">Curriculum Catalog & Prerequisite Gating</h3>
+      <p style="color: var(--gray-500); font-size: 0.9rem;">
+        Enroll in courses. Advanced courses are securely locked on the backend until prerequisite conditions and gating assessments are satisfied.
+      </p>
+    </div>
+
+    <div id="courses-catalog-container" class="grid grid-cols-3">
+      <div style="color: var(--gray-400);">Loading course catalog...</div>
+    </div>
+  </div>
+
+  <!-- TAB 5: ASSESSMENT HISTORY -->
+  <div id="tab-history" class="tab-content">
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">Historical Attempts & Verified Results</h3>
+      <p style="color: var(--gray-500); font-size: 0.9rem;">
+        All assessment submissions are objectively scored on the backend. Historical scores remain immutable.
+      </p>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Attempt ID</th>
+            <th>Assessment Title</th>
+            <th>Attempt #</th>
+            <th>Score %</th>
+            <th>Status</th>
+            <th>Completed At</th>
+          </tr>
+        </thead>
+        <tbody id="attempts-table-body">
+          <tr><td colspan="6" style="text-align: center; color: var(--gray-400);">Loading attempts...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 6: SUPPORT TICKETS -->
+  <div id="tab-support" class="tab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">My Support Requests</h3>
+        <p style="color: var(--gray-500); font-size: 0.9rem;">Direct communication with academic and support staff.</p>
+      </div>
+      <button onclick="openSupportTicketModal()" class="btn btn-primary btn-sm">➕ Create New Ticket</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Category</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Resolution</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="tickets-table-body">
+          <tr><td colspan="7" style="text-align: center; color: var(--gray-400);">Loading tickets...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     MODALS
+     ========================================================================== -->
+
+<!-- Assessment Runner Modal -->
+<div id="assessment-modal" class="modal-backdrop">
+  <div class="modal-dialog" style="max-width: 720px;">
+    <div class="modal-header">
+      <h3 class="modal-title" id="quiz-title">Assessment Runner</h3>
+      <button type="button" class="modal-close" onclick="closeModal('assessment-modal')">&times;</button>
+    </div>
+    <div class="modal-body" id="quiz-body">
+      <!-- Dynamically injected questions -->
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('assessment-modal')">Cancel</button>
+      <button type="button" id="quiz-submit-btn" class="btn btn-primary btn-sm" onclick="submitAssessmentAnswers()">Submit for Grading</button>
+    </div>
+  </div>
+</div>
+
+<!-- Support Ticket Creation Modal -->
+<div id="support-modal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Submit Support Ticket</h3>
+      <button type="button" class="modal-close" onclick="closeModal('support-modal')">&times;</button>
+    </div>
+    <form id="support-ticket-form">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="ticket-category" class="form-control">
+            <option value="PREREQUISITE">Course Prerequisite Lock Query</option>
+            <option value="ASSESSMENT">Assessment Submission Issue</option>
+            <option value="RECOMMENDATION">Incorrect Recommendation</option>
+            <option value="LOGIN">Login / Authentication Problem</option>
+            <option value="CONTENT">Content / Learning Material Bug</option>
+            <option value="OTHER">Other Assistance</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <input type="text" id="ticket-subject" class="form-control" placeholder="Brief summary of the issue" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="ticket-description" class="form-control" rows="4" placeholder="Detailed explanation so our support team can assist you." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('support-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">Submit Ticket</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/learner.js"></script>
+{% endblock %}

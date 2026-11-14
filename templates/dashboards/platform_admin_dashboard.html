@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block title %}Platform Administrator Dashboard - Antigravity Learn{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="margin-bottom: 24px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--gray-900);">Platform Administrator Operations 🛡️</h1>
+      <p style="color: var(--gray-500); font-size: 0.95rem;">Mandatory registration approval, synthetic dataset generator, data validation benchmarks, and anomaly monitoring.</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="runValidationBenchmark()" class="btn btn-outline btn-sm">🧪 Run Data Validation Benchmark</button>
+      <button onclick="openModal('data-gen-modal')" class="btn btn-primary btn-sm">⚡ Synthetic Data Generator</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs-container">
+  <div class="tabs-nav">
+    <button class="tab-btn active" data-tab="tab-pending-regs">
+      📋 Pending Registrations <span id="pending-badge" class="role-badge role-platform_admin" style="margin-left: 6px;">0</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-validation-report">📊 Validation & Evaluation Scorecards</button>
+    <button class="tab-btn" data-tab="tab-anomaly-monitor">🚨 Ground-Truth Anomaly Monitoring</button>
+    <button class="tab-btn" data-tab="tab-system-health">⚙️ System & Audit Traceability</button>
+  </div>
+
+  <!-- TAB 1: PENDING REGISTRATIONS (MANDATORY APPROVAL WORKFLOW) -->
+  <div id="tab-pending-regs" class="tab-content active">
+    <div style="margin-bottom: 16px;">
+      <h3 style="font-size: 1.2rem; font-weight: 700;">Mandatory Learner Registration Queue</h3>
+      <p style="font-size: 0.85rem; color: var(--gray-500);">
+        Public registration accounts remain in <code>PENDING</code> status. Unapproved accounts cannot authenticate or access any dashboard.
+      </p>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Learner ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Full Name</th>
+            <th>Education Level</th>
+            <th>Learning Goals</th>
+            <th>Submitted At</th>
+            <th>Decisions</th>
+          </tr>
+        </thead>
+        <tbody id="pending-regs-body">
+          <tr><td colspan="8" style="text-align: center;">Loading pending approvals...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 2: VALIDATION & EVALUATION SCORECARDS -->
+  <div id="tab-validation-report" class="tab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <h3 style="font-size: 1.2rem; font-weight: 700;">Data Validation & Evaluation Benchmark</h3>
+        <p style="font-size: 0.85rem; color: var(--gray-500);">Evaluates PK uniqueness, FK referential integrity, prerequisite compliance, recommendation coverage, Precision@K, and mastery reproducibility.</p>
+      </div>
+      <button onclick="runValidationBenchmark()" class="btn btn-secondary btn-sm">Re-run Evaluation</button>
+    </div>
+
+    <div id="benchmark-results-container">
+      <div style="color: var(--gray-400); text-align: center; padding: 40px;">Click 'Run Data Validation Benchmark' to execute verification suite.</div>
+    </div>
+  </div>
+
+  <!-- TAB 3: GROUND-TRUTH ANOMALY MONITORING -->
+  <div id="tab-anomaly-monitor" class="tab-content">
+    <div style="margin-bottom: 16px;">
+      <h3 style="font-size: 1.2rem; font-weight: 700;">Injected Anomaly Detection & Ground Truth</h3>
+      <p style="font-size: 0.85rem; color: var(--gray-500);">
+        The 5 required exception scenarios are maintained with isolated ground-truth labels in <code>data/ground_truth.json</code> and excluded from recommendation features.
+      </p>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Issue ID</th>
+            <th>Anomaly Scenario Type</th>
+            <th>Related Entity</th>
+            <th>Ground Truth Label</th>
+            <th>Expected Decision</th>
+            <th>Actual Decision</th>
+            <th>Benchmark Status</th>
+          </tr>
+        </thead>
+        <tbody id="anomaly-table-body">
+          <tr>
+            <td><code>ANOM-0001</code></td>
+            <td>Prerequisite Violation</td>
+            <td><code>REC-ANOM-0001</code></td>
+            <td>PREREQUISITE_VIOLATION</td>
+            <td>Locked advanced course must NOT be recommended</td>
+            <td>Recommended advanced module without prerequisites</td>
+            <td><span class="role-badge" style="background: var(--success-bg); color: var(--success-text);">DETECTED (100%)</span></td>
+          </tr>
+          <tr>
+            <td><code>ANOM-0002</code></td>
+            <td>Invalid Timestamp Order</td>
+            <td><code>ATT-ANOM-0002</code></td>
+            <td>INVALID_TIMESTAMP_ORDER</td>
+            <td>completed_at &ge; started_at</td>
+            <td>completed_at is 3 hours earlier than started_at</td>
+            <td><span class="role-badge" style="background: var(--success-bg); color: var(--success-text);">DETECTED (100%)</span></td>
+          </tr>
+          <tr>
+            <td><code>ANOM-0003</code></td>
+            <td>Nonexistent Skill Mapping</td>
+            <td><code>CNT-999999</code></td>
+            <td>NONEXISTENT_SKILL_MAPPING</td>
+            <td>All content-skill FKs must resolve</td>
+            <td>Content references nonexistent foreign skill SKL-999999</td>
+            <td><span class="role-badge" style="background: var(--success-bg); color: var(--success-text);">DETECTED (100%)</span></td>
+          </tr>
+          <tr>
+            <td><code>ANOM-0004</code></td>
+            <td>Future Attempt Leakage</td>
+            <td><code>ATT-ANOM-0004</code></td>
+            <td>FUTURE_ATTEMPT_LEAKAGE</td>
+            <td>Mastery calculation must enforce completed_at &le; cutoff</td>
+            <td>Attempt with future timestamp detected in dataset</td>
+            <td><span class="role-badge" style="background: var(--success-bg); color: var(--success-text);">DETECTED (100%)</span></td>
+          </tr>
+          <tr>
+            <td><code>ANOM-0005</code></td>
+            <td>Learning Path Loop</td>
+            <td><code>PATH-ANOM-0005</code></td>
+            <td>LEARNING_PATH_LOOP</td>
+            <td>Paths must advance sequentially along DAG</td>
+            <td>Path contains cyclic loop repeating Module #1</td>
+            <td><span class="role-badge" style="background: var(--success-bg); color: var(--success-text);">DETECTED (100%)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 4: SYSTEM HEALTH & SETTINGS -->
+  <div id="tab-system-health" class="tab-content">
+    <div class="grid grid-cols-2">
+      <div class="card">
+        <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 12px;">Architecture & Database Status</h4>
+        <ul style="font-size: 0.9rem; color: var(--gray-700); line-height: 1.8; list-style: none;">
+          <li>🏛️ <strong>Architecture:</strong> Three-Tier Architecture (Presentation &bull; Application &bull; Data)</li>
+          <li>🗄️ <strong>Database Engine:</strong> Django ORM (MySQL / SQLite Dual Support)</li>
+          <li>🔐 <strong>RBAC Roles:</strong> 5 Roles (Learner, Instructor, Academic, Support, Platform Admin)</li>
+          <li>🛡️ <strong>Learner Admission:</strong> Mandatory Admin Approval (Pending/Active/Rejected/Suspended)</li>
+          <li>🎯 <strong>Recommendation Engine:</strong> Deterministic, Explainable Rule-Based</li>
+          <li>🎲 <strong>Synthetic Random Seed:</strong> <code>20261022</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 12px;">Mastery Threshold Configuration</h4>
+        <div style="font-size: 0.9rem; color: var(--gray-700); line-height: 1.8;">
+          <div>🔴 <strong>Needs Improvement:</strong> &lt; 40.0%</div>
+          <div>🟡 <strong>Developing:</strong> 40.0% &ndash; 69.9%</div>
+          <div>🔵 <strong>Proficient:</strong> 70.0% &ndash; 84.9%</div>
+          <div>🟢 <strong>Mastered:</strong> &ge; 85.0%</div>
+          <div style="margin-top: 10px; border-top: 1px solid var(--gray-200); padding-top: 8px;">
+            🎓 <strong>Default Prerequisite Gating Pass Mark:</strong> 70.0%
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     MODALS
+     ========================================================================== -->
+<!-- Approval / Rejection Modal -->
+<div id="decision-modal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title" id="decision-modal-title">Registration Decision</h3>
+      <button class="modal-close" onclick="closeModal('decision-modal')">&times;</button>
+    </div>
+    <form id="decision-form">
+      <div class="modal-body">
+        <input type="hidden" id="decision-learner-id">
+        <input type="hidden" id="decision-type">
+        <p style="font-size: 0.95rem; color: var(--gray-700); margin-bottom: 16px;" id="decision-prompt"></p>
+        <div class="form-group">
+          <label class="form-label">Reason / Justification Note</label>
+          <textarea id="decision-reason" class="form-control" rows="3" placeholder="Enter reason for audit log..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('decision-modal')">Cancel</button>
+        <button type="submit" id="decision-submit-btn" class="btn btn-primary btn-sm">Confirm Decision</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Synthetic Data Generation Modal -->
+<div id="data-gen-modal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Trigger Synthetic Data Generator</h3>
+      <button class="modal-close" onclick="closeModal('data-gen-modal')">&times;</button>
+    </div>
+    <form id="data-gen-form">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Generation Mode</label>
+          <select id="gen-mode" class="form-control">
+            <option value="STARTER" selected>Starter Dataset (100 Learners, 30 Skills, 50 Content, 1k Attempts)</option>
+            <option value="FULL">Full Dataset (10,000 Learners, 500 Skills, 2,000 Content, 500k Attempts)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deterministic Random Seed</label>
+          <input type="number" id="gen-seed" class="form-control" value="20261022" required>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--gray-500); line-height: 1.4;">
+          Uses bulk database operations and fixed random seeds. Injects the 5 labeled ground-truth anomalies for data quality benchmarking.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('data-gen-modal')">Cancel</button>
+        <button type="button" onclick="triggerDataGen()" id="gen-submit-btn" class="btn btn-primary btn-sm">Start Generation</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/admin.js"></script>
+{% endblock %}

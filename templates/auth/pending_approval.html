@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Pending Approval - Personalized Learning System{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card" style="text-align: center; max-width: 520px;">
+    <div style="width: 64px; height: 64px; background: var(--warning-bg); color: var(--warning); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;">
+      ⏳
+    </div>
+
+    <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900); margin-bottom: 12px;">
+      Registration Pending Approval
+    </h2>
+
+    <p style="color: var(--gray-600); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.6;">
+      Thank you for registering! In compliance with platform security standards, your learner application has been created with status <strong style="color: var(--warning-text); background: var(--warning-bg); padding: 2px 8px; border-radius: 4px;">PENDING</strong>.
+    </p>
+
+    <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 16px; text-align: left; margin-bottom: 24px;">
+      <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-500); margin-bottom: 8px;">Next Steps:</h4>
+      <ol style="font-size: 0.85rem; color: var(--gray-700); padding-left: 20px; line-height: 1.6;">
+        <li>A Platform Administrator will review your academic credentials.</li>
+        <li>Once approved, your account status will transition to <strong>ACTIVE</strong>.</li>
+        <li>You will then be able to log in and access courses, mastery tracking, and personalized recommendations.</li>
+      </ol>
+    </div>
+
+    <a href="/login/" class="btn btn-primary" style="width: 100%;">
+      Return to Sign In Page
+    </a>
+  </div>
+</div>
+{% endblock %}
