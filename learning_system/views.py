@@ -15,13 +15,11 @@ def index_view(request):
     If not, renders login page.
     """
     if request.user.is_authenticated:
-        if request.user.status == AccountStatus.PENDING:
-            return redirect('pending_approval')
-        elif request.user.status in [AccountStatus.REJECTED, AccountStatus.SUSPENDED]:
+        if request.user.status == AccountStatus.SUSPENDED:
             return redirect('login_page')
 
         role = request.user.role
-        if role == UserRole.LEARNER:
+        if role in [UserRole.STUDENT, 'LEARNER']:
             return redirect('learner_dashboard')
         elif role == UserRole.INSTRUCTOR:
             return redirect('instructor_dashboard')
@@ -45,13 +43,9 @@ def register_page(request):
     return render(request, 'auth/register.html')
 
 
-def pending_approval_page(request):
-    return render(request, 'auth/pending_approval.html')
-
-
 @login_required(login_url='login_page')
 def learner_dashboard(request):
-    if request.user.status != AccountStatus.ACTIVE or request.user.role != UserRole.LEARNER:
+    if request.user.status != AccountStatus.ACTIVE or not request.user.is_student():
         return redirect('index')
     return render(request, 'dashboards/learner_dashboard.html', {
         'learner': getattr(request.user, 'learner_profile', None)

@@ -6,8 +6,6 @@
 ```mermaid
 erDiagram
     USER ||--o| LEARNER : "has profile"
-    USER ||--o{ REGISTRATION_APPROVAL : "reviews"
-    LEARNER ||--o{ REGISTRATION_APPROVAL : "audited by"
     LEARNER ||--o{ COURSE_ENROLLMENT : "enrolls in"
     COURSE ||--o{ COURSE_ENROLLMENT : "taken by"
     COURSE ||--o{ COURSE_PREREQUISITE : "requires"
@@ -46,7 +44,7 @@ erDiagram
 - `email`: VARCHAR(254) NOT NULL
 - `password`: VARCHAR(128) NOT NULL (Argon2 / PBKDF2 hashed)
 - `role`: VARCHAR(20) NOT NULL (`LEARNER`, `INSTRUCTOR`, `ACADEMIC_ADMIN`, `SUPPORT_STAFF`, `PLATFORM_ADMIN`)
-- `status`: VARCHAR(20) NOT NULL (`PENDING`, `ACTIVE`, `REJECTED`, `SUSPENDED`)
+- `status`: VARCHAR(20) NOT NULL (`ACTIVE`, `SUSPENDED`)
 - `phone_number`: VARCHAR(20) NULL
 - `created_at`: DATETIME(6) NOT NULL
 - `updated_at`: DATETIME(6) NOT NULL
@@ -57,14 +55,6 @@ erDiagram
 - `current_education_level`: VARCHAR(50) NOT NULL
 - `learning_goals`: LONGTEXT NOT NULL
 - `total_completed_activities`: INT UNSIGNED NOT NULL DEFAULT 0
-- `created_at`: DATETIME(6) NOT NULL
-
-#### 3. `learning_system_registrationapproval`
-- `approval_id`: VARCHAR(20) PRIMARY KEY (`APR-000001`)
-- `learner_id`: VARCHAR(20) FK -> `learning_system_learner.learner_id` (CASCADE)
-- `reviewed_by_id`: BIGINT NULL FK -> `learning_system_user.id` (SET_NULL)
-- `decision`: VARCHAR(15) NOT NULL (`APPROVED`, `REJECTED`)
-- `reason`: LONGTEXT NOT NULL
 - `created_at`: DATETIME(6) NOT NULL
 
 #### 4. `learning_system_course`

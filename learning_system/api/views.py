@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import login, logout
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError, PermissionDenied
 
@@ -15,7 +16,7 @@ from learning_system.models import (
     User, UserRole, AccountStatus, Learner, Course, Skill,
     ContentItem, ContentSkill, CourseEnrollment, EnrollmentStatus,
     Assessment, AssessmentQuestion, Attempt, SkillMastery, Recommendation, LearningPath,
-    SupportTicket, RegistrationApproval, SkillPrerequisite,
+    SupportTicket, SkillPrerequisite,
     CoursePrerequisite, DataQualityIssue
 )
 from learning_system.services import (
@@ -29,30 +30,31 @@ from learning_system.api.permissions import (
 )
 from learning_system.api.serializers import (
     UserSummarySerializer, LearnerProfileSerializer,
-    LearnerRegistrationSerializer, LoginSerializer,
-    RegistrationApprovalSerializer, SkillSerializer,
+    UserRegistrationSerializer, LearnerRegistrationSerializer, LoginSerializer,
+    SkillSerializer,
     CourseSerializer, ContentItemSerializer, AssessmentSerializer,
     AttemptSerializer, SkillMasterySerializer, RecommendationSerializer,
-    LearningPathSerializer, SupportTicketSerializer, DataQualityIssueSerializer
+    LearningPathSerializer, SupportTicketSerializer, DataQualityIssueSerializer,
 )
 
 
 # -------------------------------------------------------------------------
-# AUTHENTICATION & APPROVAL VIEWS
+# AUTHENTICATION VIEWS
 # -------------------------------------------------------------------------
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = LearnerRegistrationSerializer(data=request.data)
+        serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        learner = AuthService.register_learner(
+        user = AuthService.register_user(
             username=data['username'],
             email=data['email'],
             password=data['password'],
+            role=data.get('role', UserRole.STUDENT),
             first_name=data.get('first_name', ''),
             last_name=data.get('last_name', ''),
             education_level=data.get('education_level', 'UNDERGRADUATE'),
@@ -61,12 +63,18 @@ class RegisterView(APIView):
             ip_address=request.META.get('REMOTE_ADDR')
         )
 
+        learner_id = None
+        if hasattr(user, 'learner_profile'):
+            learner_id = user.learner_profile.learner_id
+
         return Response({
             "success": True,
-            "message": "Registration submitted successfully. Your account is PENDING approval by a Platform Administrator.",
-            "learner_id": learner.learner_id,
-            "username": learner.user.username,
-            "status": learner.user.status
+            "message": "Account created successfully. You can now sign in.",
+            "learner_id": learner_id or f"USR-{user.id:06d}",
+            "user_id": user.id,
+            "username": user.username,
+            "role": user.role,
+            "status": user.status
         }, status=status.HTTP_201_CREATED)
 
 
@@ -123,54 +131,6 @@ class MeView(APIView):
         return Response({
             "user": UserSummarySerializer(user).data,
             "learner_profile": learner_data
-        })
-
-
-class PendingRegistrationsView(APIView):
-    permission_classes = [IsPlatformAdmin]
-
-    def get(self, request):
-        pending_learners = Learner.objects.filter(
-            user__status=AccountStatus.PENDING
-        ).select_related('user').order_by('created_at')
-
-        serializer = LearnerProfileSerializer(pending_learners, many=True)
-        return Response(serializer.data)
-
-
-class ApproveRegistrationView(APIView):
-    permission_classes = [IsPlatformAdmin]
-
-    def post(self, request, learner_id):
-        reason = request.data.get('reason', '')
-        approval = AuthService.approve_registration(
-            learner_id=learner_id,
-            admin_user=request.user,
-            reason=reason,
-            ip_address=request.META.get('REMOTE_ADDR')
-        )
-        return Response({
-            "success": True,
-            "message": f"Learner {learner_id} registration APPROVED.",
-            "approval": RegistrationApprovalSerializer(approval).data
-        })
-
-
-class RejectRegistrationView(APIView):
-    permission_classes = [IsPlatformAdmin]
-
-    def post(self, request, learner_id):
-        reason = request.data.get('reason', '')
-        approval = AuthService.reject_registration(
-            learner_id=learner_id,
-            admin_user=request.user,
-            reason=reason,
-            ip_address=request.META.get('REMOTE_ADDR')
-        )
-        return Response({
-            "success": True,
-            "message": f"Learner {learner_id} registration REJECTED.",
-            "approval": RegistrationApprovalSerializer(approval).data
         })
 
 

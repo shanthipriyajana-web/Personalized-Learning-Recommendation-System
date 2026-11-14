@@ -21,7 +21,6 @@ class RecommendationAndMasteryTests(TestCase):
         self.admin = User.objects.create_superuser('admin_rec', 'ar@test.com', 'Pass123!', role=UserRole.PLATFORM_ADMIN, status=AccountStatus.ACTIVE)
 
         self.learner = AuthService.register_learner('student_rec', 'rec@test.com', 'Pass123!')
-        AuthService.approve_registration(self.learner.learner_id, self.admin)
 
         self.skill = Skill.objects.create(
             skill_id='SKL-REC01',

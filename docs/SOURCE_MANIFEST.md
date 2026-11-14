@@ -24,7 +24,7 @@ personalized_learning_system/
 │   ├── services/                             # Business Logic Service Layer
 │   │   ├── __init__.py
 │   │   ├── audit_service.py                  # Audit logging service
-│   │   ├── auth_service.py                   # Registration approval & authentication service
+│   │   ├── auth_service.py                   # Registration & authentication service
 │   │   ├── prerequisite_service.py           # Course prerequisite & assessment gating
 │   │   ├── mastery_service.py                # Deterministic skill mastery calculations
 │   │   ├── assessment_service.py             # Objective server-side assessment scoring
@@ -48,13 +48,12 @@ personalized_learning_system/
 │   ├── auth/
 │   │   ├── login.html                        # Sign in & demo account switcher
 │   │   ├── register.html                     # Learner registration
-│   │   └── pending_approval.html             # Pending approval notice
 │   └── dashboards/
 │       ├── learner_dashboard.html            # Learner recommendations & quiz runner
 │       ├── instructor_dashboard.html         # Curriculum & gating manager
 │       ├── academic_dashboard.html           # Analytics & skill gap heatmaps
 │       ├── support_dashboard.html            # Helpdesk queue & triaging
-│       └── platform_admin_dashboard.html     # Registration approval & data generator
+│       └── platform_admin_dashboard.html     # Data generator & validation benchmarks
 ├── static/
 │   ├── css/
 │   │   └── style.css                         # Modern responsive design system
@@ -64,7 +63,7 @@ personalized_learning_system/
 │       ├── instructor.js                     # Instructor workflows
 │       ├── academic.js                       # Academic analytics charts
 │       ├── support.js                        # Support tickets management
-│       └── admin.js                          # Approvals & benchmarks UI
+│       └── admin.js                          # Benchmarks UI
 ├── data/
 │   ├── ground_truth.json                     # Isolated ground-truth anomaly records
 │   └── ground_truth.csv                      # CSV format of ground-truth anomalies

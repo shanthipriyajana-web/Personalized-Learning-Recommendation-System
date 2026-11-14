@@ -11,7 +11,7 @@ The platform provides intelligent, explainable recommendations based on learner 
 
 1. **Strict Three-Tier Architecture**: Complete decoupling of Presentation, Application, and Data layers. Frontend communicates exclusively through RESTful JSON APIs.
 2. **Five-Role Access Control (RBAC)**: Distinct dashboards and permissions for **Learner**, **Instructor**, **Academic Administrator**, **Support Staff**, and **Platform Administrator**.
-3. **Mandatory Learner Registration Approval**: Public registrations enter `PENDING` status. Unapproved accounts cannot authenticate or access dashboards until reviewed and approved by an authorized Platform Administrator.
+3. **Open Registration**: Public registrations are `ACTIVE` immediately. No administrator approval step; accounts can be `SUSPENDED` if needed.
 4. **Backend Course Prerequisite & Assessment Gating**: Advanced courses (e.g. `PY201`, `PY301`) remain locked until prerequisite fundamental courses are completed and prerequisite assessments are passed with $\ge 70\%$ score.
 5. **Deterministic, Explainable Recommendation Engine**: Generates ranked next learning activities with explicit reason codes (`SKILL_GAP`, `PREREQUISITES_MET`, `COLD_START`, `ASSESSMENT_FAILED`, `DIFFICULTY_MATCH`, etc.) and pedagogical justifications.
 6. **Reproducible Skill Mastery Engine**: Computes mastery dynamically from valid attempts without future leakage, tracking history in `SkillMasteryHistory`.

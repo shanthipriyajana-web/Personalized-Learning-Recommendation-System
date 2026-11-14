@@ -15,43 +15,57 @@ from django.utils import timezone
 # -------------------------------------------------------------------------
 
 class UserRole(models.TextChoices):
-    LEARNER = 'LEARNER', 'Learner'
+    STUDENT = 'STUDENT', 'Student'
     INSTRUCTOR = 'INSTRUCTOR', 'Instructor'
     ACADEMIC_ADMIN = 'ACADEMIC_ADMIN', 'Academic Administrator'
     SUPPORT_STAFF = 'SUPPORT_STAFF', 'Support Staff'
     PLATFORM_ADMIN = 'PLATFORM_ADMIN', 'Platform Administrator'
 
+# Alias for backward compatibility
+UserRole.LEARNER = UserRole.STUDENT
+
 
 class AccountStatus(models.TextChoices):
-    PENDING = 'PENDING', 'Pending Approval'
     ACTIVE = 'ACTIVE', 'Active'
-    REJECTED = 'REJECTED', 'Rejected'
     SUSPENDED = 'SUSPENDED', 'Suspended'
 
 
 class User(AbstractUser):
     """
     Custom user model with explicit Role-Based Access Control (RBAC)
-    and Mandatory Registration Approval Lifecycle.
+    and account lifecycle (Active / Suspended).
     """
     role = models.CharField(
         max_length=20,
         choices=UserRole.choices,
-        default=UserRole.LEARNER,
+        default=UserRole.STUDENT,
         db_index=True
     )
     status = models.CharField(
         max_length=20,
         choices=AccountStatus.choices,
-        default=AccountStatus.PENDING,
+        default=AccountStatus.ACTIVE,
         db_index=True
     )
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def clean(self):
+        super().clean()
+        if self.role == UserRole.PLATFORM_ADMIN:
+            existing = User.objects.filter(role=UserRole.PLATFORM_ADMIN)
+            if self.pk:
+                existing = existing.exclude(pk=self.pk)
+            if existing.exists():
+                from django.core.exceptions import ValidationError
+                raise ValidationError("Only one Platform Administrator is permitted on the platform.")
+
+    def is_student(self):
+        return self.role in [UserRole.STUDENT, 'LEARNER']
+
     def is_learner(self):
-        return self.role == UserRole.LEARNER
+        return self.is_student()
 
     def is_instructor(self):
         return self.role == UserRole.INSTRUCTOR
@@ -73,7 +87,7 @@ class User(AbstractUser):
 
 
 # -------------------------------------------------------------------------
-# 2. LEARNER & REGISTRATION APPROVAL
+# 2. LEARNER
 # -------------------------------------------------------------------------
 
 class Learner(models.Model):
@@ -110,36 +124,8 @@ class Learner(models.Model):
         return f"{self.learner_id} - {self.user.get_full_name() or self.user.username}"
 
 
-class ApprovalDecision(models.TextChoices):
-    APPROVED = 'APPROVED', 'Approved'
-    REJECTED = 'REJECTED', 'Rejected'
-
-
-class RegistrationApproval(models.Model):
-    """
-    Audit record for mandatory learner registration approval.
-    """
-    approval_id = models.CharField(max_length=20, primary_key=True)
-    learner = models.ForeignKey(
-        Learner,
-        on_delete=models.CASCADE,
-        related_name='approval_history'
-    )
-    reviewed_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='reviewed_registrations'
-    )
-    decision = models.CharField(max_length=15, choices=ApprovalDecision.choices)
-    reason = models.TextField(blank=True, default='')
-    created_at = models.DateTimeField(default=timezone.now, db_index=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.approval_id}: {self.learner.learner_id} -> {self.decision}"
+# Alias Student to Learner
+Student = Learner
 
 
 # -------------------------------------------------------------------------

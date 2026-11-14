@@ -5,7 +5,7 @@ URL Configuration for Personalized Learning Recommendation System.
 from django.contrib import admin
 from django.urls import path, include
 from learning_system.views import (
-    index_view, login_page, register_page, pending_approval_page,
+    index_view, login_page, register_page,
     learner_dashboard, instructor_dashboard, academic_dashboard,
     support_dashboard, platform_admin_dashboard
 )
@@ -18,7 +18,6 @@ urlpatterns = [
     path('', index_view, name='index'),
     path('login/', login_page, name='login_page'),
     path('register/', register_page, name='register_page'),
-    path('pending-approval/', pending_approval_page, name='pending_approval'),
 
     # Dashboards (Role-Based Access)
     path('dashboard/learner/', learner_dashboard, name='learner_dashboard'),

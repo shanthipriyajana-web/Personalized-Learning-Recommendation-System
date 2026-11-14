@@ -1,6 +1,6 @@
 """
 Role-Based Access Control (RBAC) Custom Permissions for REST API.
-Enforces role separation and account approval checks.
+Enforces role separation and active-account checks.
 """
 
 from rest_framework import permissions
@@ -9,7 +9,7 @@ from learning_system.models import UserRole, AccountStatus
 
 class IsActiveApprovedUser(permissions.BasePermission):
     """
-    Ensures user account is authenticated, active, and APPROVED.
+    Ensures user account is authenticated and active.
     """
     def has_permission(self, request, view):
         user = request.user
@@ -23,15 +23,18 @@ class IsActiveApprovedUser(permissions.BasePermission):
 
 class IsLearner(permissions.BasePermission):
     """
-    Allows access only to authenticated, active Learners.
+    Allows access only to authenticated, active Students / Learners.
     """
     def has_permission(self, request, view):
         return bool(
             request.user and
             request.user.is_authenticated and
-            request.user.role == UserRole.LEARNER and
+            request.user.is_student() and
             request.user.status == AccountStatus.ACTIVE
         )
+
+
+IsStudent = IsLearner
 
 
 class IsInstructor(permissions.BasePermission):

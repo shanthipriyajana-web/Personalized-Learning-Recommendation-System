@@ -25,7 +25,6 @@ class PrerequisiteGatingTests(TestCase):
 
         # Learner
         self.learner = AuthService.register_learner('student_prereq', 'student@test.com', 'Pass123!')
-        AuthService.approve_registration(self.learner.learner_id, self.admin)
         self.learner.user.refresh_from_db()
 
         # Skills

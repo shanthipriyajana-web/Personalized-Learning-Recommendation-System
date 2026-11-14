@@ -5,7 +5,6 @@ RESTful API URL Routing Configuration.
 from django.urls import path
 from learning_system.api.views import (
     RegisterView, LoginView, LogoutView, MeView,
-    PendingRegistrationsView, ApproveRegistrationView, RejectRegistrationView,
     CourseListCreateView, CourseDetailView, CourseEnrollView,
     SkillListCreateView, SkillPrerequisiteCreateView,
     ContentListCreateView, ContentSkillMapView,
@@ -22,11 +21,6 @@ urlpatterns = [
     path('auth/login', LoginView.as_view(), name='api-login'),
     path('auth/logout', LogoutView.as_view(), name='api-logout'),
     path('auth/me', MeView.as_view(), name='api-me'),
-
-    # Mandatory Registration Approval (Platform Admin)
-    path('admin/registrations/pending', PendingRegistrationsView.as_view(), name='api-pending-registrations'),
-    path('admin/registrations/<str:learner_id>/approve', ApproveRegistrationView.as_view(), name='api-approve-registration'),
-    path('admin/registrations/<str:learner_id>/reject', RejectRegistrationView.as_view(), name='api-reject-registration'),
 
     # Courses & Prerequisite Gating
     path('courses', CourseListCreateView.as_view(), name='api-courses'),

@@ -7,7 +7,7 @@ The system features an automated test suite verifying business rules, security b
 
 | Test Module | Coverage Scope | Verified Business Rules |
 | :--- | :--- | :--- |
-| `tests/test_auth_rbac.py` | Authentication & RBAC | Mandatory `PENDING` status on registration, Platform Admin approval requirement, rejection handling, role isolation. |
+| `tests/test_auth_rbac.py` | Authentication & RBAC | Immediate `ACTIVE` status on registration, instant login, suspended-account blocking, role isolation. |
 | `tests/test_prerequisites.py` | Prerequisite Gating | Fundamental enrollment open, advanced course access blocked (`403`), prerequisite course completion verification, gating assessment passing ($\ge 70\%$). |
 | `tests/test_recommendations.py` | Recommendation Engine | Cold start reasoning, deterministic score calculation, mastery calculation reproducibility without future leakage. |
 | `tests/test_validation.py` | Validation & Benchmarks | Skill DAG cycle detection, PK uniqueness, FK referential integrity, and anomaly detection rate ($100\%$). |

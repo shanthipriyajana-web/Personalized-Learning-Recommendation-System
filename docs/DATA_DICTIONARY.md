@@ -14,7 +14,7 @@ This document provides a comprehensive reference of all attributes, data types, 
 | `email` | VARCHAR(254) | No | None | Contact email address. |
 | `password` | VARCHAR(128) | No | None | PBKDF2/SHA256 hashed password. |
 | `role` | VARCHAR(20) | No | `'LEARNER'` | RBAC Role (`LEARNER`, `INSTRUCTOR`, `ACADEMIC_ADMIN`, `SUPPORT_STAFF`, `PLATFORM_ADMIN`). |
-| `status` | VARCHAR(20) | No | `'PENDING'` | Lifecycle Status (`PENDING`, `ACTIVE`, `REJECTED`, `SUSPENDED`). |
+| `status` | VARCHAR(20) | No | `'ACTIVE'` | Lifecycle Status (`ACTIVE`, `SUSPENDED`). |
 | `phone_number` | VARCHAR(20) | Yes | NULL | Contact phone number. |
 | `created_at` | DATETIME(6) | No | `timezone.now` | User registration timestamp. |
 | `updated_at` | DATETIME(6) | No | `auto_now` | Timestamp of last user modification. |

@@ -12,12 +12,12 @@ flowchart TD
         UI_Instructor["Instructor Dashboard\n(Courses, Content, Skills, Gating)"]
         UI_Academic["Academic Admin Dashboard\n(Analytics, Cohorts, Skill Gaps)"]
         UI_Support["Support Staff Dashboard\n(Ticket Queue & Investigation)"]
-        UI_Admin["Platform Admin Dashboard\n(Pending Approvals, Data Gen, Anomaly Benchmarks)"]
+        UI_Admin["Platform Admin Dashboard\n(Data Gen, Anomaly Benchmarks)"]
     end
 
     subgraph Tier2["Tier 2: Application Layer (Python / Django / Django REST Framework)"]
         API_Gateway["DRF REST API & Authentication Gateway"]
-        Auth_Service["AuthService & RBAC\n(Mandatory Registration Approval)"]
+        Auth_Service["AuthService & RBAC\n(Open Registration)"]
         Prereq_Service["PrerequisiteService\n(Course & Assessment Gating)"]
         Mastery_Service["MasteryService\n(Deterministic Calculation)"]
         Rec_Engine["RecommendationService\n(Rule-Based & Explainable)"]
@@ -28,7 +28,7 @@ flowchart TD
     end
 
     subgraph Tier3["Tier 3: Data Layer (MySQL / SQLite with Django ORM)"]
-        DB_Users["User & Learner Profiles\nRegistration Approvals"]
+        DB_Users["User & Learner Profiles"]
         DB_Curriculum["Courses, Prerequisites, Skills,\nSkillPrerequisite DAG"]
         DB_Content["ContentItems & ContentSkill\nRelevance Weights"]
         DB_Assessments["Assessments, Questions, Attempts,\nResponses & Results"]
@@ -69,13 +69,13 @@ flowchart TD
 - **Technologies**: Semantic HTML5, CSS3 Custom Properties Design System, Vanilla ES6+ JavaScript.
 - **Protocol**: Exclusively consumes Tier 2 via HTTP REST JSON APIs (`fetch` with CSRF protection). Direct database communication from the presentation tier is strictly prohibited.
 - **Components**:
-  1. **Authentication Views**: Login (`/login/`), Registration (`/register/`), Pending Approval notice (`/pending-approval/`).
+  1. **Authentication Views**: Login (`/login/`), Registration (`/register/`).
   2. **Role Dashboards**:
      - *Learner*: Personalized recommendation cards with reason badges, real-time mastery meters, interactive assessment runner modal, learning path milestone viewer, locked course catalog with prerequisite tooltips, support request modal.
      - *Instructor*: Course creator, skill DAG configurator, content-to-skill mapper with weights, assessment question bank builder, at-risk learner alert monitor.
      - *Academic Admin*: Cohort analytics, enrollment vs completion rates, curriculum skill gap heatmaps, academic report exports.
      - *Support Staff*: Support ticket triaging, category filters, learner investigation modal, escalation workflow.
-     - *Platform Admin*: Learner registration approval/rejection queue, synthetic data generator control panel, live validation benchmark scorecard.
+     - *Platform Admin*: Synthetic data generator control panel, live validation benchmark scorecard.
 
 ---
 
@@ -83,9 +83,8 @@ flowchart TD
 The application layer isolates business logic from views and controllers through a dedicated **Service Layer**:
 
 - `AuthService`:
-  - Registers learners in `PENDING` status.
-  - Enforces mandatory review by Platform Administrator before account activation.
-  - Rejection and suspension enforcement at credential verification.
+  - Registers users as `ACTIVE` immediately (no approval step).
+  - Suspension enforcement at credential verification.
 - `PrerequisiteService`:
   - Evaluates course eligibility on the backend.
   - Enforces completion of prerequisite courses, minimum skill mastery levels (e.g. $\ge 70\%$), and passing prerequisite gating assessments ($\ge 70\%$).
@@ -126,5 +125,4 @@ The application layer isolates business logic from views and controllers through
   - `Recommendation`: `REC-000001`
   - `Assessment`: `ASM-000001`
   - `Support Ticket`: `TCK-000001`
-  - `Approval Audit`: `APR-000001`
 - **Integrity**: Enforced foreign keys with `CASCADE` and `SET_NULL`, unique compound constraints on bridge models (`(course, prerequisite_course)`, `(content_item, skill)`, `(learner, skill)`), and B-Tree database indexes on query paths.

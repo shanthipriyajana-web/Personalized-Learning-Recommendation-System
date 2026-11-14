@@ -11,6 +11,7 @@ import csv
 import random
 from datetime import timedelta
 from pathlib import Path
+from typing import List
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
@@ -25,7 +26,6 @@ from learning_system.models import (
     Recommendation, RecommendationReasonCode, RecommendationOutcome,
     LearningPath, LearningPathItem, LearningPathStatus, LearningPathItemStatus,
     DataGenerationRun, GenerationMode, DataQualityIssue, AnomalyType,
-    RegistrationApproval, ApprovalDecision
 )
 from learning_system.services.mastery_service import MasteryService
 
@@ -33,13 +33,25 @@ from learning_system.services.mastery_service import MasteryService
 class DataGeneratorService:
     DEFAULT_SEED = 20261022
 
+    @staticmethod
+    def _get_or_create_demo_user(username: str, password: str, defaults: dict) -> User:
+        """Create a documented demo account or restore its demo password."""
+        user, _ = User.objects.get_or_create(
+            username=username,
+            defaults={**defaults, 'password': make_password(password)},
+        )
+        if not user.check_password(password):
+            user.set_password(password)
+            user.save(update_fields=['password'])
+        return user
+
     @classmethod
     def generate_dataset(cls, mode: str = 'STARTER', seed: int = DEFAULT_SEED,
                          export_dir: Path = None, verbose: bool = True) -> DataGenerationRun:
         """
         Generates synthetic data following the exact topological sequence:
         1. Base Platform Users (Admins, Instructors, Support)
-        2. Learners & Registration Approvals
+        2. Learners
         3. Skills
         4. Skill Prerequisites (DAG)
         5. Courses & Course Prerequisites
@@ -78,13 +90,13 @@ class DataGeneratorService:
         # -------------------------------------------------------------
         # STEP 1: Standard System Accounts (All 5 Roles)
         # -------------------------------------------------------------
-        default_pwd = make_password('Admin12345!')
+        demo_password = 'Admin12345!'
 
-        admin_user, _ = User.objects.get_or_create(
+        admin_user = cls._get_or_create_demo_user(
             username='platform_admin',
+            password=demo_password,
             defaults={
                 'email': 'admin@platform.edu',
-                'password': default_pwd,
                 'first_name': 'Platform',
                 'last_name': 'Administrator',
                 'role': UserRole.PLATFORM_ADMIN,
@@ -94,11 +106,11 @@ class DataGeneratorService:
             }
         )
 
-        academic_admin, _ = User.objects.get_or_create(
+        academic_admin = cls._get_or_create_demo_user(
             username='academic_admin',
+            password=demo_password,
             defaults={
                 'email': 'academic@platform.edu',
-                'password': default_pwd,
                 'first_name': 'Academic',
                 'last_name': 'Dean',
                 'role': UserRole.ACADEMIC_ADMIN,
@@ -106,11 +118,11 @@ class DataGeneratorService:
             }
         )
 
-        instructor_user, _ = User.objects.get_or_create(
+        instructor_user = cls._get_or_create_demo_user(
             username='prof_smith',
+            password=demo_password,
             defaults={
                 'email': 'smith@platform.edu',
-                'password': default_pwd,
                 'first_name': 'Professor',
                 'last_name': 'Smith',
                 'role': UserRole.INSTRUCTOR,
@@ -118,11 +130,11 @@ class DataGeneratorService:
             }
         )
 
-        support_user, _ = User.objects.get_or_create(
+        support_user = cls._get_or_create_demo_user(
             username='support_rep',
+            password=demo_password,
             defaults={
                 'email': 'support@platform.edu',
-                'password': default_pwd,
                 'first_name': 'Support',
                 'last_name': 'Agent',
                 'role': UserRole.SUPPORT_STAFF,
@@ -361,15 +373,14 @@ class DataGeneratorService:
                 AssessmentQuestion.objects.bulk_create(questions_to_create)
 
         # -------------------------------------------------------------
-        # STEP 6: Learners & Mandatory Registration Approvals
+        # STEP 6: Learners
         # -------------------------------------------------------------
         if verbose:
-            print(f"[*] Generating {learner_count} learners & approval records...")
+            print(f"[*] Generating {learner_count} learners...")
         existing_learner_count = Learner.objects.count()
         needed_learners = max(0, learner_count - existing_learner_count)
 
         created_learners = []
-        approvals_to_create = []
 
         base_time = timezone.now() - timedelta(days=90)
 
@@ -378,16 +389,9 @@ class DataGeneratorService:
             lrn_id = f"LRN-{seq:06d}"
             username = f"learner_{seq:06d}"
 
-            # 90% Active/Approved, 5% Pending, 3% Rejected, 2% Suspended
+            # 98% Active, 2% Suspended
             r_val = random.random()
-            if r_val < 0.90:
-                acc_status = AccountStatus.ACTIVE
-            elif r_val < 0.95:
-                acc_status = AccountStatus.PENDING
-            elif r_val < 0.98:
-                acc_status = AccountStatus.REJECTED
-            else:
-                acc_status = AccountStatus.SUSPENDED
+            acc_status = AccountStatus.ACTIVE if r_val < 0.98 else AccountStatus.SUSPENDED
 
             reg_time = base_time + timedelta(hours=i * 2)
 
@@ -414,22 +418,8 @@ class DataGeneratorService:
             )
             created_learners.append(lrn)
 
-            if acc_status in [AccountStatus.ACTIVE, AccountStatus.REJECTED]:
-                dec = ApprovalDecision.APPROVED if acc_status == AccountStatus.ACTIVE else ApprovalDecision.REJECTED
-                app_obj = RegistrationApproval(
-                    approval_id=f"APR-{seq:06d}",
-                    learner=lrn,
-                    reviewed_by=admin_user,
-                    decision=dec,
-                    reason=f"Verification automated during generation #{seq}",
-                    created_at=reg_time + timedelta(minutes=15)
-                )
-                approvals_to_create.append(app_obj)
-
         if created_learners:
             Learner.objects.bulk_create(created_learners, batch_size=500)
-        if approvals_to_create:
-            RegistrationApproval.objects.bulk_create(approvals_to_create, batch_size=500)
 
         all_learners = list(Learner.objects.select_related('user').filter(user__status=AccountStatus.ACTIVE))
 

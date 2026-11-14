@@ -13,7 +13,7 @@ The application exposes a fully RESTful Application Programming Interface (API) 
 
 #### `POST /api/auth/register`
 - **Permission**: Public (Unauthenticated)
-- **Description**: Registers a new learner account with `status: PENDING`.
+- **Description**: Registers a new account; it is `ACTIVE` immediately and can sign in right away.
 - **Request Body**:
   ```json
   {
@@ -30,10 +30,10 @@ The application exposes a fully RESTful Application Programming Interface (API) 
   ```json
   {
     "success": true,
-    "message": "Registration submitted successfully. Your account is PENDING approval by a Platform Administrator.",
+    "message": "Account created successfully. You can now sign in.",
     "learner_id": "LRN-000101",
     "username": "alice_johnson",
-    "status": "PENDING"
+    "status": "ACTIVE"
   }
   ```
 
@@ -63,48 +63,11 @@ The application exposes a fully RESTful Application Programming Interface (API) 
   }
   ```
 - **Errors**:
-  - `400 Bad Request`: If credentials are invalid, or if account status is `PENDING`, `REJECTED`, or `SUSPENDED`.
+  - `400 Bad Request`: If credentials are invalid, or if the account is `SUSPENDED`.
 
 ---
 
-### 2. Platform Administrator Approval Endpoints
-
-#### `GET /api/admin/registrations/pending`
-- **Permission**: `PLATFORM_ADMIN`
-- **Description**: Lists all learner registrations awaiting approval.
-- **Response** (`200 OK`): Array of learner profiles with status `PENDING`.
-
-#### `POST /api/admin/registrations/{learner_id}/approve`
-- **Permission**: `PLATFORM_ADMIN`
-- **Description**: Approves a pending learner and activates the account.
-- **Request Body**:
-  ```json
-  {
-    "reason": "Academic credentials and student ID verified."
-  }
-  ```
-- **Response** (`200 OK`):
-  ```json
-  {
-    "success": true,
-    "message": "Learner LRN-000101 registration APPROVED.",
-    "approval": {
-      "approval_id": "APR-000095",
-      "learner_id": "LRN-000101",
-      "decision": "APPROVED",
-      "reason": "Academic credentials and student ID verified.",
-      "created_at": "2026-11-14T09:40:00Z"
-    }
-  }
-  ```
-
-#### `POST /api/admin/registrations/{learner_id}/reject`
-- **Permission**: `PLATFORM_ADMIN`
-- **Description**: Rejects a registration application.
-
----
-
-### 3. Courses & Prerequisite Gating Endpoints
+### 2. Courses & Prerequisite Gating Endpoints
 
 #### `GET /api/courses`
 - **Permission**: Authenticated Active Users
@@ -141,7 +104,7 @@ The application exposes a fully RESTful Application Programming Interface (API) 
 
 ---
 
-### 4. Assessments & Objective Grading Endpoints
+### 3. Assessments & Objective Grading Endpoints
 
 #### `POST /api/assessments/{assessment_id}/start`
 - **Permission**: `LEARNER`
@@ -183,7 +146,7 @@ The application exposes a fully RESTful Application Programming Interface (API) 
 
 ---
 
-### 5. Recommendation Endpoints
+### 4. Recommendation Endpoints
 
 #### `POST /api/recommendations/generate`
 - **Permission**: `LEARNER`
@@ -212,7 +175,7 @@ The application exposes a fully RESTful Application Programming Interface (API) 
 
 ---
 
-### 6. Validation & Analytics Endpoints
+### 5. Validation & Analytics Endpoints
 
 #### `GET /api/admin/data-validation`
 - **Permission**: `PLATFORM_ADMIN`

@@ -9,7 +9,7 @@ from learning_system.models import (
     Skill, SkillPrerequisite, ContentItem, ContentSkill, CourseEnrollment,
     Assessment, AssessmentQuestion, Attempt, AssessmentResponse,
     AssessmentResult, SkillMastery, Recommendation, LearningPath,
-    LearningPathItem, SupportTicket, RegistrationApproval, DataQualityIssue
+    LearningPathItem, SupportTicket, DataQualityIssue
 )
 
 
@@ -31,34 +31,38 @@ class LearnerProfileSerializer(serializers.ModelSerializer):
         ]
 
 
-class LearnerRegistrationSerializer(serializers.Serializer):
+class UserRegistrationSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8)
+    role = serializers.ChoiceField(
+        choices=[
+            ('STUDENT', 'Student'),
+            ('INSTRUCTOR', 'Instructor'),
+            ('ACADEMIC_ADMIN', 'Academic Administrator'),
+            ('SUPPORT_STAFF', 'Support Staff')
+        ],
+        default='STUDENT'
+    )
     first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    education_level = serializers.CharField(max_length=50, default='UNDERGRADUATE')
+    education_level = serializers.CharField(max_length=50, default='UNDERGRADUATE', required=False)
     learning_goals = serializers.CharField(required=False, allow_blank=True)
     phone_number = serializers.CharField(max_length=20, required=False, allow_blank=True)
+
+    def validate_role(self, value):
+        if value == UserRole.PLATFORM_ADMIN:
+            raise serializers.ValidationError("Platform Administrator accounts cannot be registered publicly. Only one Platform Administrator is permitted on the platform.")
+        return value
+
+
+# Alias for backward compatibility
+LearnerRegistrationSerializer = UserRegistrationSerializer
 
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
-
-
-class RegistrationApprovalSerializer(serializers.ModelSerializer):
-    learner_id = serializers.CharField(source='learner.learner_id', read_only=True)
-    username = serializers.CharField(source='learner.user.username', read_only=True)
-    email = serializers.CharField(source='learner.user.email', read_only=True)
-    reviewed_by_name = serializers.CharField(source='reviewed_by.username', read_only=True)
-
-    class Meta:
-        model = RegistrationApproval
-        fields = [
-            'approval_id', 'learner_id', 'username', 'email',
-            'reviewed_by_name', 'decision', 'reason', 'created_at'
-        ]
 
 
 class SkillSerializer(serializers.ModelSerializer):

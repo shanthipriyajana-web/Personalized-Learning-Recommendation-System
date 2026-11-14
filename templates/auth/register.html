@@ -7,18 +7,27 @@
   <div class="auth-card" style="max-width: 540px;">
     <div style="text-align: center; margin-bottom: 24px;">
       <div class="brand-icon" style="margin: 0 auto 16px; width: 48px; height: 48px; font-size: 1.5rem;">📝</div>
-      <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900);">Learner Registration</h2>
-      <p style="color: var(--gray-500); font-size: 0.9rem;">Submit your details for platform admission</p>
-    </div>
-
-    <div style="background: var(--warning-bg); border-left: 4px solid var(--warning); padding: 12px 16px; margin-bottom: 20px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
-      <p style="font-size: 0.85rem; color: var(--warning-text); margin: 0;">
-        <strong>Mandatory Security Notice:</strong> New accounts are registered with <code>PENDING</code> status and must be verified by a Platform Administrator before authentication.
-      </p>
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900);">User Registration</h2>
+      <p style="color: var(--gray-500); font-size: 0.9rem;">Create your account to get started.</p>
     </div>
 
     <form id="register-form">
       {% csrf_token %}
+
+      <!-- Role Selection Dropdown -->
+      <div class="form-group">
+        <label class="form-label">Select Your Role</label>
+        <select id="role" class="form-control" onchange="toggleRoleFields()" required>
+          <option value="STUDENT" selected>Student (Learner)</option>
+          <option value="INSTRUCTOR">Instructor</option>
+          <option value="ACADEMIC_ADMIN">Academic Administrator</option>
+          <option value="SUPPORT_STAFF">Support Staff</option>
+        </select>
+        <small style="color: var(--gray-500); font-size: 0.8rem; margin-top: 4px; display: block;">
+          *Note: Platform Administrator is a singular, pre-configured role and cannot be registered publicly.
+        </small>
+      </div>
+
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
         <div class="form-group">
           <label class="form-label">First Name</label>
@@ -45,23 +54,26 @@
         <input type="password" id="password" class="form-control" placeholder="••••••••" required minlength="8">
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Education Level</label>
-        <select id="education_level" class="form-control">
-          <option value="HIGH_SCHOOL">High School</option>
-          <option value="UNDERGRADUATE" selected>Undergraduate Student</option>
-          <option value="GRADUATE">Graduate Student</option>
-          <option value="PROFESSIONAL">Industry Professional</option>
-        </select>
-      </div>
+      <!-- Student-Specific Fields -->
+      <div id="student-specific-fields">
+        <div class="form-group">
+          <label class="form-label">Education Level</label>
+          <select id="education_level" class="form-control">
+            <option value="HIGH_SCHOOL">High School</option>
+            <option value="UNDERGRADUATE" selected>Undergraduate Student</option>
+            <option value="GRADUATE">Graduate Student</option>
+            <option value="PROFESSIONAL">Industry Professional</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label class="form-label">Primary Learning Goals</label>
-        <textarea id="learning_goals" class="form-control" rows="2" placeholder="e.g. Master Python, Algorithms, and Object-Oriented Architecture."></textarea>
+        <div class="form-group">
+          <label class="form-label">Primary Learning Goals</label>
+          <textarea id="learning_goals" class="form-control" rows="2" placeholder="e.g. Master Python, Algorithms, and Object-Oriented Architecture."></textarea>
+        </div>
       </div>
 
       <button type="submit" id="reg-btn" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
-        Submit Registration Application
+        Register
       </button>
     </form>
 
@@ -76,16 +88,29 @@
 
 {% block extra_scripts %}
 <script>
+function toggleRoleFields() {
+  const role = document.getElementById('role').value;
+  const studentFields = document.getElementById('student-specific-fields');
+  if (role === 'STUDENT') {
+    studentFields.style.display = 'block';
+  } else {
+    studentFields.style.display = 'none';
+  }
+}
+
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('reg-btn');
   btn.disabled = true;
-  btn.innerText = 'Submitting Application...';
+  btn.innerText = 'Registering...';
+
+  const role = document.getElementById('role').value;
 
   const payload = {
     username: document.getElementById('username').value.trim(),
     email: document.getElementById('email').value.trim(),
     password: document.getElementById('password').value,
+    role: role,
     first_name: document.getElementById('first_name').value.trim(),
     last_name: document.getElementById('last_name').value.trim(),
     education_level: document.getElementById('education_level').value,
@@ -100,12 +125,12 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
 
     showToast(data.message, 'success');
     setTimeout(() => {
-      window.location.href = '/pending-approval/';
-    }, 1200);
+      window.location.href = '/login/';
+    }, 1000);
   } catch (err) {
     showToast(err.message, 'danger');
     btn.disabled = false;
-    btn.innerText = 'Submit Registration Application';
+    btn.innerText = 'Register';
   }
 });
 </script>

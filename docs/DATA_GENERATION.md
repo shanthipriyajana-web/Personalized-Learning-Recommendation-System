@@ -45,7 +45,7 @@ python manage.py generate_synthetic_data --mode FULL --seed 20261022
 4. **Courses & Prerequisite Rules**: Fundamental courses (`PY101`, `DB101`) and Advanced gated courses (`PY102`, `PY201`, `PY301`, `WEB201`).
 5. **Content Items**: Multi-format learning resources (`VIDEO`, `ARTICLE`, `EXERCISE`, `QUIZ`).
 6. **Content-Skill Mappings**: Weighted association between content items and skills ($0.1 - 1.0$).
-7. **Learners & Approvals**: 90% Active/Approved, 5% Pending, 3% Rejected, 2% Suspended.
+7. **Learners**: 98% Active, 2% Suspended.
 8. **Attempts & Results**: Beta distribution scores centered at $72\%$ with realistic pass/fail variance.
 9. **Mastery Calculations**: Computed without temporal leakage.
 10. **Recommendations**: Top-5 ranked activities with reason codes.
