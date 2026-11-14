@@ -27,7 +27,7 @@ flowchart TD
         Audit_Service["AuditService\n(Traceability Log)"]
     end
 
-    subgraph Tier3["Tier 3: Data Layer (MySQL / SQLite with Django ORM)"]
+    subgraph Tier3["Tier 3: Data Layer (MySQL with Django ORM)"]
         DB_Users["User & Learner Profiles"]
         DB_Curriculum["Courses, Prerequisites, Skills,\nSkillPrerequisite DAG"]
         DB_Content["ContentItems & ContentSkill\nRelevance Weights"]
@@ -113,8 +113,8 @@ The application layer isolates business logic from views and controllers through
 
 ---
 
-### 4. Tier 3: Data Layer (Django ORM & MySQL/SQLite)
-- **Engine**: MySQL Server 8.0 (with production connection pooling and strict SQL modes) and SQLite 3 for local zero-dependency testing.
+### 4. Tier 3: Data Layer (Django ORM & MySQL)
+- **Engine**: MySQL Server 8.0 with strict SQL mode.
 - **Entity Identification Scheme**:
   - `Learner`: `LRN-000001`
   - `Course`: `CRS-000001`

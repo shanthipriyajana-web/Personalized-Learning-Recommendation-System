@@ -25,7 +25,7 @@ The platform provides intelligent, explainable recommendations based on learner 
 
 - **Presentation Layer (Tier 1)**: HTML5, CSS3 Custom Properties Design System, Vanilla ES6+ JavaScript, Responsive Grid/Flexbox layouts.
 - **Application Layer (Tier 2)**: Python 3.14, Django 6.0, Django REST Framework 3.17, Django Service Layer.
-- **Data Layer (Tier 3)**: MySQL Server 8.0 & SQLite 3 fallback, Django ORM with immutable zero-padded IDs (`LRN-000001`, `CRS-000001`, `SKL-000001`, `CNT-000001`, `ATT-<learner_id>-000001`, `PATH-2026-000001`, `REC-000001`).
+- **Data Layer (Tier 3)**: MySQL Server 8.0 with Django ORM and immutable zero-padded IDs (`LRN-000001`, `CRS-000001`, `SKL-000001`, `CNT-000001`, `ATT-<learner_id>-000001`, `PATH-2026-000001`, `REC-000001`).
 - **Data Processing**: Pandas 2.3, NumPy 2.3.
 - **Testing**: Django Native Test Runner & DRF API Client.
 
@@ -52,6 +52,14 @@ Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
+
+Create the MySQL database and configure `.env` with your MySQL credentials. The defaults are `DB_NAME=personalized_learning_db`, `DB_USER=root`, `DB_HOST=127.0.0.1`, and `DB_PORT=3306`.
+
+```sql
+CREATE DATABASE personalized_learning_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Set `DB_ENGINE=mysql` in `.env` and set `DB_PASSWORD` to your MySQL password before starting Django.
 
 ### 2. Database Migrations
 

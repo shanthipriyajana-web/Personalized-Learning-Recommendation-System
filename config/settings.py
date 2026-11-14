@@ -70,8 +70,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-# Production-ready dual configuration: MySQL & SQLite fallback
-DB_ENGINE_CHOICE = os.environ.get('DB_ENGINE', 'sqlite').lower()
+# MySQL is the default; SQLite remains available only when explicitly selected.
+DB_ENGINE_CHOICE = os.environ.get('DB_ENGINE', 'mysql').lower()
 
 if DB_ENGINE_CHOICE == 'mysql':
     import pymysql
