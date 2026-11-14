@@ -35,10 +35,11 @@ The platform provides intelligent, explainable recommendations based on learner 
 
 ### 1. Environment Setup
 
-Clone or navigate to the project directory:
+Clone the project from GitHub, then enter its directory:
 
 ```bash
-cd C:\Users\Shanthipriya\.gemini\antigravity\scratch\personalized_learning_system
+git clone https://github.com/shanthipriyajana-web/Personalized-Learning-Recommendation-System.git
+cd Personalized-Learning-Recommendation-System
 ```
 
 Copy the environment template:
