@@ -46,7 +46,7 @@ personalized_learning_system/
 ├── templates/                                # HTML5 Presentation Tier
 │   ├── base.html                             # Global layout, navbar, toasts
 │   ├── auth/
-│   │   ├── login.html                        # Sign in & demo account switcher
+│   │   ├── login.html                        # Sign in form
 │   │   ├── register.html                     # Learner registration
 │   └── dashboards/
 │       ├── learner_dashboard.html            # Learner recommendations & quiz runner

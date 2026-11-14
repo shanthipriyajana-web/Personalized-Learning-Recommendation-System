@@ -39,11 +39,6 @@
 
 {% block extra_scripts %}
 <script>
-function fillCreds(username) {
-  document.getElementById('username').value = username;
-  document.getElementById('password').value = 'Admin12345!';
-}
-
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('login-btn');

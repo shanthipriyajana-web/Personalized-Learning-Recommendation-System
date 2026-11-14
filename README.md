@@ -103,17 +103,15 @@ Open your browser at: **`http://127.0.0.1:8000/`**
 
 ---
 
-## 👥 Demo Accounts (Password: `Admin12345!`)
+## Account Setup
 
-| Role | Username | Password | Purpose & Access |
-| :--- | :--- | :--- | :--- |
-| **Learner** | `learner_000001` | `Admin12345!` | Personalized recommendations, mastery meters, quiz runner, learning path, catalog. |
-| **Instructor** | `prof_smith` | `Admin12345!` | Course creation, skill DAG mapping, content uploader, at-risk learner monitor. |
-| **Academic Admin** | `academic_admin` | `Admin12345!` | Enrollment analytics, completion rates, curriculum skill gap analysis. |
-| **Support Staff** | `support_rep` | `Admin12345!` | Helpdesk queue, ticket investigation, resolution updates. |
-| **Platform Admin** | `platform_admin` | `Admin12345!` | Synthetic data generator, validation benchmark, anomaly monitoring. |
+Create an administrator account for Django admin and the platform admin dashboard:
 
-*Note: The login page includes 1-click demo credential fill buttons for instant testing of all 5 roles!*
+```bash
+python manage.py createsuperuser
+```
+
+Synthetic learner records created by the data generator cannot be used to sign in.
 
 ---
 

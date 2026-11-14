@@ -15,7 +15,6 @@ from typing import List
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
-from django.contrib.auth.hashers import make_password
 
 from learning_system.models import (
     User, UserRole, AccountStatus, Learner, Course, CoursePrerequisite,
@@ -32,18 +31,6 @@ from learning_system.services.mastery_service import MasteryService
 
 class DataGeneratorService:
     DEFAULT_SEED = 20261022
-
-    @staticmethod
-    def _get_or_create_demo_user(username: str, password: str, defaults: dict) -> User:
-        """Create a documented demo account or restore its demo password."""
-        user, _ = User.objects.get_or_create(
-            username=username,
-            defaults={**defaults, 'password': make_password(password)},
-        )
-        if not user.check_password(password):
-            user.set_password(password)
-            user.save(update_fields=['password'])
-        return user
 
     @classmethod
     def generate_dataset(cls, mode: str = 'STARTER', seed: int = DEFAULT_SEED,
@@ -86,61 +73,6 @@ class DataGeneratorService:
 
         if verbose:
             print(f"[*] Starting Data Generation ({mode} Mode, Seed: {seed})...")
-
-        # -------------------------------------------------------------
-        # STEP 1: Standard System Accounts (All 5 Roles)
-        # -------------------------------------------------------------
-        demo_password = 'Admin12345!'
-
-        admin_user = cls._get_or_create_demo_user(
-            username='platform_admin',
-            password=demo_password,
-            defaults={
-                'email': 'admin@platform.edu',
-                'first_name': 'Platform',
-                'last_name': 'Administrator',
-                'role': UserRole.PLATFORM_ADMIN,
-                'status': AccountStatus.ACTIVE,
-                'is_staff': True,
-                'is_superuser': True
-            }
-        )
-
-        academic_admin = cls._get_or_create_demo_user(
-            username='academic_admin',
-            password=demo_password,
-            defaults={
-                'email': 'academic@platform.edu',
-                'first_name': 'Academic',
-                'last_name': 'Dean',
-                'role': UserRole.ACADEMIC_ADMIN,
-                'status': AccountStatus.ACTIVE
-            }
-        )
-
-        instructor_user = cls._get_or_create_demo_user(
-            username='prof_smith',
-            password=demo_password,
-            defaults={
-                'email': 'smith@platform.edu',
-                'first_name': 'Professor',
-                'last_name': 'Smith',
-                'role': UserRole.INSTRUCTOR,
-                'status': AccountStatus.ACTIVE
-            }
-        )
-
-        support_user = cls._get_or_create_demo_user(
-            username='support_rep',
-            password=demo_password,
-            defaults={
-                'email': 'support@platform.edu',
-                'first_name': 'Support',
-                'last_name': 'Agent',
-                'role': UserRole.SUPPORT_STAFF,
-                'status': AccountStatus.ACTIVE
-            }
-        )
 
         # -------------------------------------------------------------
         # STEP 2: Skills & Skill Prerequisites (DAG)
@@ -216,7 +148,7 @@ class DataGeneratorService:
                     'description': f"Comprehensive curriculum for {title}.",
                     'difficulty': diff,
                     'is_advanced': is_adv,
-                    'created_by': instructor_user
+                    'created_by': None
                 }
             )
             courses_db.append(c)
@@ -398,7 +330,6 @@ class DataGeneratorService:
             u = User(
                 username=username,
                 email=f"{username}@platform.edu",
-                password=default_pwd,
                 first_name=f"Learner{seq}",
                 last_name="Student",
                 role=UserRole.LEARNER,
@@ -406,6 +337,7 @@ class DataGeneratorService:
                 is_active=(acc_status == AccountStatus.ACTIVE),
                 created_at=reg_time
             )
+            u.set_unusable_password()
             u.save()
 
             lrn = Learner(

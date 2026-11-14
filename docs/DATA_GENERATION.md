@@ -39,7 +39,7 @@ python manage.py generate_synthetic_data --mode FULL --seed 20261022
 
 ### 3. Topological Generation Pipeline
 
-1. **System Roles**: Standard test accounts for `platform_admin`, `academic_admin`, `prof_smith` (Instructor), and `support_rep`.
+1. **Synthetic Learners**: Generates learner profiles with unusable passwords; it does not create shared demo login accounts.
 2. **Skills**: Modular skill taxonomy across 6 core computer science areas.
 3. **Skill Prerequisites**: Valid Directed Acyclic Graph (DAG) using lower-index dependency binding ($j < i$).
 4. **Courses & Prerequisite Rules**: Fundamental courses (`PY101`, `DB101`) and Advanced gated courses (`PY102`, `PY201`, `PY301`, `WEB201`).
